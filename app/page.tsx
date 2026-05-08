@@ -12,6 +12,7 @@ import {
   Mail,
   AlertCircle
 } from 'lucide-react';
+import Link from "next/link"
 
 export default function LandingPage() {
   return (
@@ -32,9 +33,11 @@ export default function LandingPage() {
             <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
           </div>
           <div>
+            <Link href="/audit">
             <button className="bg-emerald-500 hover:bg-emerald-600 text-white px-5 py-2.5 rounded-full text-sm font-semibold transition-all shadow-sm hover:shadow-md flex items-center gap-2">
               Check My AI Spend
             </button>
+            </Link>
           </div>
         </div>
       </nav>
@@ -55,11 +58,15 @@ export default function LandingPage() {
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
                 Most startups waste thousands annually on unused ChatGPT, Claude, and Copilot seats. Credex Audit analyzes your stack, finds the bloat, and tells you exactly what to cut.
               </p>
+              
               <div className="flex flex-col sm:flex-row gap-4 mb-10">
+                <Link href="/audit">
                 <button className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-4 rounded-full text-base font-semibold transition-all shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 flex items-center justify-center gap-2 h-14">
                   Check My AI Spend
                   <ArrowRight className="w-5 h-5" />
                 </button>
+                </Link>
+                
                 <button className="bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 px-8 py-4 rounded-full text-base font-semibold transition-all flex items-center justify-center h-14">
                   View Sample Audit
                 </button>
