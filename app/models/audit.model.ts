@@ -1,0 +1,86 @@
+import mongoose, { Schema, Document, model, models } from "mongoose";
+
+const ToolInputSchema = new Schema(
+  {
+    name: { type: String, required: true },
+    plan: { type: String, required: true },
+    seats: { type: Number, required: true },
+    activeUsers: { type: Number, required: true },
+    monthlySpend: { type: Number, required: true },
+    billingCycle: {
+      type: String,
+      enum: ["monthly", "annual"],
+      required: true,
+    },
+    contractStatus: {
+      type: String,
+      enum: ["month-to-month", "in-annual-contract", "contract-ending-soon"],
+      required: true,
+    },
+    intensity: { type: String, required: true },
+    usage: { type: String, required: true },
+    primaryFeatureUsed: {
+      type: String,
+      enum: ["autocomplete", "chat", "agents", "api-calls", "docs", "review"],
+      required: true,
+    },
+  },
+  { _id: false } // no separate _id per tool subdoc
+);
+
+export interface IAudit extends Document {
+  auditId: string;
+  // Step 1 fields
+  teamSize: number;
+  techTeamSize: number;
+  primaryUseCase: string;
+  companyStage: string;
+  hasApiUsage: boolean;
+  // Step 2 fields
+  tools: {
+    name: string;
+    plan: string;
+    seats: number;
+    activeUsers: number;
+    monthlySpend: number;
+    billingCycle: "monthly" | "annual";
+    contractStatus: "month-to-month" | "in-annual-contract" | "contract-ending-soon";
+    intensity: string;
+    usage: string;
+    primaryFeatureUsed: "autocomplete" | "chat" | "agents" | "api-calls" | "docs" | "review";
+  }[];
+  // Computed on save
+  totalMonthlySpend: number;
+  // Lead capture (added later via separate endpoint)
+  email?: string;
+  companyName?: string;
+  role?: string;
+  createdAt: Date;
+}
+
+const AuditSchema = new Schema<IAudit>(
+  {
+    auditId: { type: String, required: true, unique: true, index: true },
+
+    // Step 1
+    teamSize: { type: Number, required: true },
+    techTeamSize: { type: Number, required: true },
+    primaryUseCase: { type: String, required: true },
+    companyStage: { type: String, default: "" },
+    hasApiUsage: { type: Boolean, required: true },
+
+    // Step 2
+    tools: { type: [ToolInputSchema], required: true },
+
+    // Derived
+    totalMonthlySpend: { type: Number, required: true },
+
+    // Lead capture (optional at creation time)
+    email: { type: String, default: null },
+    companyName: { type: String, default: null },
+    role: { type: String, default: null },
+  },
+  { timestamps: true }
+);
+
+export const Audit = models.Audit || model<IAudit>("Audit", AuditSchema);
