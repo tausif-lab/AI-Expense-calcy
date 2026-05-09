@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm, useFieldArray, Controller } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion, AnimatePresence } from "framer-motion";
@@ -12,28 +12,48 @@ import {
   ChevronLeft,
   BarChart3,
   ShieldCheck,
-  CreditCard,
   Users,
   Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // --- VALIDATION SCHEMA ---
-const toolSchema = z.object({
-  name: z.string().min(1, "Select a tool"),
-  plan: z.string().min(1, "Select a plan"),
-  seats: z.number().min(1, "Min 1 seat"),
-  monthlySpend: z.number().min(0, "Invalid amount"),
-  billingCycle: z.enum(["monthly", "annual"]),
-  intensity: z.string().min(1, "Select intensity"),
-  usage: z.string().min(1, "Select usage type"),
-});
+const toolSchema = z
+  .object({
+    name: z.string().min(1, "Select a tool"),
+    plan: z.string().min(1, "Select a plan"),
+    seats: z.number().min(1, "Min 1 seat"),
+    monthlySpend: z.number().min(0, "Invalid amount"),
+    billingCycle: z.enum(["monthly", "annual"]),
+    intensity: z.string().min(1, "Select intensity"),
+    usage: z.string().min(1, "Select usage type"),
+    activeUsers: z.number().min(1, "Min 1 active user"),
+    contractStatus: z.enum([
+      "month-to-month",
+      "in-annual-contract",
+      "contract-ending-soon",
+    ]),
+    primaryFeatureUsed: z.enum([
+      "autocomplete",
+      "chat",
+      "agents",
+      "api-calls",
+      "docs",
+      "review",
+    ]),
+  })
+  .refine((data) => data.activeUsers <= data.seats, {
+    message: "Active users can't exceed total seats",
+    path: ["activeUsers"],
+  });
 
 const formSchema = z.object({
   teamSize: z.number().min(1, "Required"),
   primaryUseCase: z.string().min(1, "Required"),
   companyStage: z.string().optional(),
   tools: z.array(toolSchema).min(1, "Add at least one tool"),
+  techTeamSize: z.number().min(0, "Required"),
+  hasApiUsage: z.boolean(),
 });
 type FormData = z.infer<typeof formSchema>;
 
@@ -58,6 +78,7 @@ const PLANS: Record<string, string[]> = {
   "OpenAI API": ["API Direct"],
   Gemini: ["Free", "Pro", "Ultra", "API Direct"],
   Windsurf: ["Free", "Pro", "Teams"],
+  Default: ["Starter", "Pro", "Business", "Enterprise"],
 };
 
 export default function AuditForm() {
@@ -75,6 +96,8 @@ export default function AuditForm() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       teamSize: 1,
+      techTeamSize: 1,
+      hasApiUsage: false,
       primaryUseCase: "Coding",
       companyStage: "",
       tools: [
@@ -82,14 +105,18 @@ export default function AuditForm() {
           name: "Cursor",
           plan: "Pro",
           seats: 1,
+          activeUsers: 1,
           monthlySpend: 20,
           billingCycle: "monthly",
+          contractStatus: "month-to-month",
           intensity: "Medium",
           usage: "Coding",
+          primaryFeatureUsed: "autocomplete",
         },
       ],
     },
-    mode: "onChange",
+    //mode: "onChange",
+    mode: "all",
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -100,13 +127,38 @@ export default function AuditForm() {
   const watchedTools = watch("tools");
 
   // --- LOCAL STORAGE PERSISTENCE ---
-  useEffect(() => {
+  /*useEffect(() => {
     const saved = localStorage.getItem("credx_audit_form");
     if (saved) {
       const parsed = JSON.parse(saved);
       Object.keys(parsed).forEach((key) => {
         setValue(key as any, parsed[key]);
       });
+    }
+  }, [setValue]);*/
+  useEffect(() => {
+    const saved = localStorage.getItem("credx_audit_form");
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Force numbers on fields that must be numbers
+        if (parsed.teamSize) parsed.teamSize = Number(parsed.teamSize);
+        if (parsed.techTeamSize)
+          parsed.techTeamSize = Number(parsed.techTeamSize);
+        if (parsed.tools) {
+          parsed.tools = parsed.tools.map((t: any) => ({
+            ...t,
+            seats: Number(t.seats),
+            activeUsers: Number(t.activeUsers),
+            monthlySpend: Number(t.monthlySpend),
+          }));
+        }
+        Object.keys(parsed).forEach((key) => {
+          setValue(key as keyof FormData, parsed[key]);
+        });
+      } catch {
+        localStorage.removeItem("credx_audit_form");
+      }
     }
   }, [setValue]);
 
@@ -119,11 +171,28 @@ export default function AuditForm() {
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
-    // Simulate API Call
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    console.log("Audit Data:", data);
-    alert("Audit Generated! Check console for data.");
-    setIsSubmitting(false);
+    try {
+      const res = await fetch("/api/audit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+
+      const json = await res.json();
+
+      if (!res.ok) throw new Error(json.error || "Failed to create audit");
+
+      // Clear persisted form state
+      localStorage.removeItem("credx_audit_form");
+
+      // Redirect to results page
+      window.location.href = `/audit/${json.auditId}`;
+    } catch (err) {
+      console.error("Submission error:", err);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const nextStep = () => setStep((s) => s + 1);
@@ -156,7 +225,13 @@ export default function AuditForm() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form
+          onSubmit={
+            handleSubmit(onSubmit, (validationErrors) => {
+              console.log("❌ Form validation failed:", validationErrors);
+            }) as React.FormEventHandler<HTMLFormElement>
+          }
+        >
           <AnimatePresence mode="wait">
             {/* STEP 1: COMPANY CONTEXT */}
             {step === 1 && (
@@ -237,6 +312,55 @@ export default function AuditForm() {
                       ))}
                     </select>
                   </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold flex items-center gap-2">
+                      <Users className="w-4 h-4 text-gray-400" /> Tech / Dev
+                      Team Size
+                    </label>
+                    <input
+                      type="number"
+                      {...register("techTeamSize", { valueAsNumber: true })}
+                      placeholder="e.g. 4"
+                      className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                    />
+                    <p className="text-xs text-gray-400">
+                      How many people actively write or review code?
+                    </p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold">
+                      Do you use any AI APIs directly?
+                    </label>
+                    <div className="flex gap-3 mt-1">
+                      {[
+                        { label: "Yes", value: true },
+                        { label: "No", value: false },
+                      ].map(({ label, value }) => (
+                        <label
+                          key={label}
+                          className={cn(
+                            "flex-1 flex items-center justify-center gap-2 p-3 rounded-xl border-2 cursor-pointer transition-all font-semibold text-sm",
+                            watch("hasApiUsage") === value
+                              ? "border-emerald-500 bg-emerald-50 text-emerald-700"
+                              : "border-gray-200 text-gray-500 hover:border-gray-300",
+                          )}
+                        >
+                          <input
+                            type="radio"
+                            className="sr-only"
+                            onChange={() => setValue("hasApiUsage", value)}
+                            checked={watch("hasApiUsage") === value}
+                          />
+                          {label}
+                        </label>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-400">
+                      e.g. calling Anthropic or OpenAI API directly in your
+                      codebase.
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -266,10 +390,13 @@ export default function AuditForm() {
                         name: "ChatGPT",
                         plan: "Plus",
                         seats: 1,
+                        activeUsers: 1,
                         monthlySpend: 20,
                         billingCycle: "monthly",
+                        contractStatus: "month-to-month",
                         intensity: "Medium",
                         usage: "Mixed",
+                        primaryFeatureUsed: "chat",
                       })
                     }
                     className="flex items-center gap-2 text-sm font-bold text-emerald-600 bg-emerald-50 px-4 py-2 rounded-lg hover:bg-emerald-100 transition-colors"
@@ -375,6 +502,64 @@ export default function AuditForm() {
                           <p className="text-xs text-gray-400">
                             Annual plans often save 15–20%.
                           </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase text-gray-400">
+                            Active Users
+                          </label>
+                          <input
+                            type="number"
+                            {...register(`tools.${index}.activeUsers`, {
+                              valueAsNumber: true,
+                            })}
+                            className="w-full p-2.5 rounded-lg border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                          />
+                          <p className="text-xs text-gray-400">
+                            Out of {watchedTools[index]?.seats || 1} seats, how
+                            many actively use this?
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase text-gray-400">
+                            Contract Status
+                          </label>
+                          <select
+                            {...register(`tools.${index}.contractStatus`)}
+                            className="w-full p-2.5 rounded-lg border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                          >
+                            <option value="month-to-month">
+                              Month-to-month
+                            </option>
+                            <option value="in-annual-contract">
+                              Locked in annual contract
+                            </option>
+                            <option value="contract-ending-soon">
+                              Annual — ending soon
+                            </option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold uppercase text-gray-400">
+                            Primarily Used For
+                          </label>
+                          <select
+                            {...register(`tools.${index}.primaryFeatureUsed`)}
+                            className="w-full p-2.5 rounded-lg border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                          >
+                            <option value="autocomplete">
+                              Code Autocomplete
+                            </option>
+                            <option value="chat">Chat / Q&A</option>
+                            <option value="agents">Agents / Long tasks</option>
+                            <option value="api-calls">
+                              API calls in codebase
+                            </option>
+                            <option value="docs">Docs / Writing</option>
+                            <option value="review">Code Review</option>
+                          </select>
                         </div>
 
                         <div className="space-y-2">
