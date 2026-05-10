@@ -1,3 +1,4 @@
+//app/api/audit/[auditId]/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { connectDB } from "@/config/config";
 import { Audit } from "@/app/models/audit.model";

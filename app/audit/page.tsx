@@ -1,3 +1,4 @@
+//app/audit/page.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -69,16 +70,63 @@ const TOOL_OPTIONS = [
   "Windsurf",
 ];
 
-const PLANS: Record<string, string[]> = {
-  Cursor: ["Hobby", "Pro", "Business", "Enterprise"],
-  "GitHub Copilot": ["Individual", "Business", "Enterprise"],
-  Claude: ["Free", "Pro", "Max", "Team", "Enterprise", "API Direct"],
-  ChatGPT: ["Plus", "Team", "Enterprise", "API Direct"],
-  "Anthropic API": ["API Direct"],
-  "OpenAI API": ["API Direct"],
-  Gemini: ["Free", "Pro", "Ultra", "API Direct"],
-  Windsurf: ["Free", "Pro", "Teams"],
-  Default: ["Starter", "Pro", "Business", "Enterprise"],
+const PLANS: Record<string, { plan: string; monthlyPrice: number }[]> = {
+  Cursor: [
+    { plan: "Hobby", monthlyPrice: 0 },
+    { plan: "Pro", monthlyPrice: 20 },
+    { plan: "Business", monthlyPrice: 40 },
+    { plan: "Enterprise", monthlyPrice: 0 }, // custom
+  ],
+  "GitHub Copilot": [
+    { plan: "Free", monthlyPrice: 0 },
+    { plan: "Pro (Individual)", monthlyPrice: 10 },
+    { plan: "Pro+ (Individual)", monthlyPrice: 39 },
+    { plan: "Business", monthlyPrice: 19 },
+    { plan: "Enterprise", monthlyPrice: 39 },
+  ],
+  Claude: [
+    { plan: "Free", monthlyPrice: 0 },
+    { plan: "Pro", monthlyPrice: 20 },
+    { plan: "Max 5x", monthlyPrice: 100 },
+    { plan: "Max 20x", monthlyPrice: 200 },
+    { plan: "Team", monthlyPrice: 25 },
+    { plan: "Enterprise", monthlyPrice: 0 },
+    { plan: "API Direct", monthlyPrice: 0 },
+  ],
+  ChatGPT: [
+    { plan: "Free", monthlyPrice: 0 },
+    { plan: "Plus", monthlyPrice: 20 },
+    { plan: "Pro", monthlyPrice: 200 },
+    { plan: "Business", monthlyPrice: 20 }, // annual/seat
+    { plan: "Enterprise", monthlyPrice: 0 },
+    { plan: "API Direct", monthlyPrice: 0 },
+  ],
+  "Anthropic API": [
+    { plan: "API Direct", monthlyPrice: 0 },
+  ],
+  "OpenAI API": [
+    { plan: "API Direct", monthlyPrice: 0 },
+  ],
+  Gemini: [
+    { plan: "Free", monthlyPrice: 0 },
+    { plan: "Google AI Plus", monthlyPrice: 7.99 },
+    { plan: "Google AI Pro", monthlyPrice: 19.99 },
+    { plan: "Google AI Ultra", monthlyPrice: 249.99 },
+    { plan: "API Direct", monthlyPrice: 0 },
+  ],
+  Windsurf: [
+    { plan: "Free", monthlyPrice: 0 },
+    { plan: "Pro", monthlyPrice: 15 },
+    { plan: "Pro Plus", monthlyPrice: 35 },
+    { plan: "Teams", monthlyPrice: 25 },
+    { plan: "Enterprise", monthlyPrice: 0 },
+  ],
+  Default: [
+    { plan: "Starter", monthlyPrice: 0 },
+    { plan: "Pro", monthlyPrice: 20 },
+    { plan: "Business", monthlyPrice: 40 },
+    { plan: "Enterprise", monthlyPrice: 0 },
+  ],
 };
 
 export default function AuditForm() {
@@ -126,16 +174,7 @@ export default function AuditForm() {
 
   const watchedTools = watch("tools");
 
-  // --- LOCAL STORAGE PERSISTENCE ---
-  /*useEffect(() => {
-    const saved = localStorage.getItem("credx_audit_form");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      Object.keys(parsed).forEach((key) => {
-        setValue(key as any, parsed[key]);
-      });
-    }
-  }, [setValue]);*/
+  
   useEffect(() => {
     const saved = localStorage.getItem("credx_audit_form");
     if (saved) {
@@ -443,7 +482,7 @@ export default function AuditForm() {
                           <label className="text-xs font-bold uppercase text-gray-400">
                             Current Plan
                           </label>
-                          <select
+                          {/*<select
                             {...register(`tools.${index}.plan`)}
                             className="w-full p-2.5 rounded-lg border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
                           >
@@ -454,7 +493,14 @@ export default function AuditForm() {
                                 {opt}
                               </option>
                             ))}
-                          </select>
+                          </select>*/}
+                          <select {...register(`tools.${index}.plan`)}
+                          className="w-full p-2.5 rounded-lg border border-gray-100 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all">
+  <option value="">Select plan</option>
+  {(PLANS[watchedTools[index]?.name] ?? PLANS.Default).map(({ plan }) => (
+    <option key={plan} value={plan}>{plan}</option>
+  ))}
+</select>
                         </div>
 
                         <div className="space-y-2">

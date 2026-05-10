@@ -1,8 +1,11 @@
+//app/audit/[auditId]/page.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { div } from "framer-motion/client";
+
 
 interface ToolInput {
   name: string;
@@ -15,8 +18,19 @@ interface ToolInput {
   primaryFeatureUsed: string;
   intensity: string;
   usage: string;
+ 
 }
-
+interface ToolFinding {
+  toolName: string;
+  plan: string;
+  currentSpend: number;
+  recommendedAction: string;
+  estimatedMonthlySaving: number;
+  severity: "high" | "medium" | "low" | "optimal";
+  reason: string;
+  inferredSpend: number;
+  tags: string[];
+}
 interface AuditData {
   auditId: string;
   teamSize: number;
@@ -27,6 +41,13 @@ interface AuditData {
   tools: ToolInput[];
   totalMonthlySpend: number;
   createdAt: string;
+  totalMonthlySavings: number;
+totalAnnualSavings: number;
+isHighSavings: boolean;
+overallStatus: "overspending" | "optimized" | "mixed";
+findings: ToolFinding[];
+totalCurrentSpend: number;
+summary: string;
 }
 
 export default function AuditResultPage() {
@@ -122,41 +143,114 @@ export default function AuditResultPage() {
           </div>
         </div>
 
-        {/* Per Tool Breakdown */}
-        <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="font-bold text-lg">Tool Breakdown</h2>
+        {/* Savings Hero — only show if savings exist */}
+{audit.totalMonthlySavings > 0 && (
+  <div className="bg-emerald-50 border border-emerald-200 rounded-3xl p-8">
+    <p className="text-xs font-bold uppercase tracking-widest text-emerald-600">
+      Potential Savings Identified
+    </p>
+    <p className="text-5xl font-bold text-emerald-700 mt-2">
+      ${audit.totalMonthlySavings.toFixed(0)}/mo
+    </p>
+    <p className="text-emerald-600 text-sm mt-1">
+      ${audit.totalAnnualSavings.toFixed(0)} saved per year
+    </p>
+    {audit.isHighSavings && (
+      <div className="mt-4 p-4 bg-white rounded-2xl border border-emerald-200">
+        <p className="font-bold text-gray-900 text-sm">
+          💡 You qualify for a Credex consultation
+        </p>
+        <p className="text-gray-500 text-xs mt-1">
+          With $500+/mo in savings potential, our team can help you capture
+          these savings through discounted AI credits.
+        </p>
+         <a
+          href="https://credex.rocks"
+          target="_blank"
+          className="inline-block mt-3 bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-emerald-700 transition-all"
+        >
+          Book a Free Consultation →
+        </a>
+      </div>
+    )}
+  </div>
+)}
+
+{/* Optimized state */}
+{audit.totalMonthlySavings === 0 && (
+  <div className="bg-gray-50 border border-gray-200 rounded-3xl p-6 text-center">
+    <p className="text-2xl font-bold text-gray-900">✅ You're spending well</p>
+    <p className="text-gray-500 text-sm mt-2">
+      No major optimizations found for your current stack.
+    </p>
+  </div>
+)}
+
+{/* Per-tool findings */}
+<div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
+  <div className="p-6 border-b border-gray-100">
+    <h2 className="font-bold text-lg">Audit Findings</h2>
+  </div>
+  <div className="divide-y divide-gray-100">
+    {audit.findings.map((finding, i) => (
+      <div key={i} className="p-6">
+        <div className="flex justify-between items-start">
+          <div className="flex items-center gap-3">
+            <span
+              className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${
+                finding.severity === "high"
+                  ? "bg-red-500"
+                  : finding.severity === "medium"
+                  ? "bg-amber-400"
+                  : finding.severity === "low"
+                  ? "bg-blue-400"
+                  : "bg-emerald-400"
+              }`}
+            />
+            <div>
+              <p className="font-bold text-gray-900">{finding.toolName}</p>
+              <p className="text-sm text-gray-500">{finding.plan} · ${finding.currentSpend}/mo</p>
+            </div>
           </div>
-          <div className="divide-y divide-gray-100">
-            {audit.tools.map((tool, i) => (
-              <div key={i} className="p-6 flex justify-between items-start">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center font-bold text-emerald-600">
-                    {tool.name[0]}
-                  </div>
-                  <div>
-                    <p className="font-bold">{tool.name}</p>
-                    <p className="text-sm text-gray-500">
-                      {tool.plan} · {tool.seats} seats · {tool.activeUsers}{" "}
-                      active
-                    </p>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {tool.billingCycle} · {tool.contractStatus}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-gray-900">
-                    ${tool.monthlySpend}/mo
-                  </p>
-                  <p className="text-xs text-gray-400">
-                    ${tool.monthlySpend * 12}/yr
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          {finding.estimatedMonthlySaving > 0 && (
+            <span className="text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
+              Save ${finding.estimatedMonthlySaving}/mo
+            </span>
+          )}
+          {finding.severity === "optimal" && (
+            <span className="text-sm font-bold text-gray-400 bg-gray-50 px-3 py-1 rounded-full">
+              ✓ Optimal
+            </span>
+          )}
         </div>
+        <p className="text-sm font-semibold text-gray-800 mt-3">
+          {finding.recommendedAction}
+        </p>
+        <p className="text-xs text-gray-400 mt-1">{finding.reason}</p>
+      </div>
+    ))}
+  </div>
+</div>
+
+{/* Email capture */}
+<div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
+  <h2 className="font-bold text-lg">Get the full report in your inbox</h2>
+  <p className="text-gray-400 text-sm mt-1">
+    We'll send a detailed PDF with your findings, savings breakdown, and
+    recommended next steps.
+  </p>
+  <div className="flex gap-3 mt-4">
+    <input
+      type="email"
+      placeholder="you@company.com"
+      className="flex-1 p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+    />
+    <button className="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-800 transition-all">
+      Send Report
+    </button>
+  </div>
+  <p className="text-xs text-gray-300 mt-2">No spam. One email. Unsubscribe anytime.</p>
+</div>
 
         {/* Start New Audit */}
         <div className="text-center pt-4">
