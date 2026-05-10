@@ -55,6 +55,10 @@ export default function AuditResultPage() {
   const [audit, setAudit] = useState<AuditData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+const [emailSubmitting, setEmailSubmitting] = useState(false);
+const [reportUrl, setReportUrl] = useState("");
+const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     if (!auditId) return;
@@ -102,6 +106,28 @@ export default function AuditResultPage() {
       </div>
     );
   }
+  const handleEmailSubmit = async () => {
+  if (!email || !email.includes("@")) {
+    setEmailError("Please enter a valid email.");
+    return;
+  }
+  setEmailError("");
+  setEmailSubmitting(true);
+  try {
+    const res = await fetch(`/api/audit/${auditId}/report`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Failed to generate report");
+    setReportUrl(`${window.location.origin}/report/${json.reportId}`);
+  } catch (err: any) {
+    setEmailError(err.message || "Something went wrong. Try again.");
+  } finally {
+    setEmailSubmitting(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] py-12 px-4 sm:px-6">
@@ -234,22 +260,47 @@ export default function AuditResultPage() {
 
 {/* Email capture */}
 <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
-  <h2 className="font-bold text-lg">Get the full report in your inbox</h2>
+  <h2 className="font-bold text-lg">Get your AI-generated report</h2>
   <p className="text-gray-400 text-sm mt-1">
-    We'll send a detailed PDF with your findings, savings breakdown, and
-    recommended next steps.
+    Enter your email and we'll generate a personalised 100-word AI analysis of your audit.
   </p>
   <div className="flex gap-3 mt-4">
     <input
       type="email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
       placeholder="you@company.com"
       className="flex-1 p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
     />
-    <button className="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-800 transition-all">
-      Send Report
+    <button
+      onClick={handleEmailSubmit}
+      disabled={emailSubmitting}
+      className="bg-black text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-gray-800 transition-all disabled:opacity-50"
+    >
+      {emailSubmitting ? "Generating..." : "Generate Report"}
     </button>
   </div>
-  <p className="text-xs text-gray-300 mt-2">No spam. One email. Unsubscribe anytime.</p>
+  {emailError && (
+    <p className="text-red-500 text-xs mt-2">{emailError}</p>
+  )}
+  {reportUrl && (
+    <div className="mt-4 p-4 bg-emerald-50 border border-emerald-200 rounded-2xl">
+      <p className="text-sm font-semibold text-gray-800">
+        ✅ Your report is ready!
+      </p>
+      <a
+        href={reportUrl}
+        target="_blank"
+        className="text-emerald-600 underline text-sm break-all mt-1 block"
+      >
+        {reportUrl}
+      </a>
+      <p className="text-xs text-gray-400 mt-2">
+        Bookmark this link — it works anytime, from anywhere.
+      </p>
+    </div>
+  )}
+  <p className="text-xs text-gray-300 mt-3">No spam. One email. Unsubscribe anytime.</p>
 </div>
 
         {/* Start New Audit */}

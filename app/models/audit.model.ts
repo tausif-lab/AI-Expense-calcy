@@ -82,6 +82,8 @@ export interface IAudit extends Document {
   companyName?: string;
   role?: string;
   createdAt: Date;
+  aiSummary?: string;
+  reportId?: string;
 }
 
 const AuditSchema = new Schema<IAudit>(
@@ -106,14 +108,16 @@ const AuditSchema = new Schema<IAudit>(
     companyName: { type: String, default: null },
     role: { type: String, default: null },
     findings: { type: [ToolFindingSchema], default: [] },
-totalMonthlySavings: { type: Number, default: 0 },
-totalAnnualSavings: { type: Number, default: 0 },
-isHighSavings: { type: Boolean, default: false },
-overallStatus: {
-  type: String,
-  enum: ["overspending", "optimized", "mixed"],
-  default: "mixed",
-},
+    totalMonthlySavings: { type: Number, default: 0 },
+    totalAnnualSavings: { type: Number, default: 0 },
+    isHighSavings: { type: Boolean, default: false },
+    overallStatus: {
+      type: String,
+      enum: ["overspending", "optimized", "mixed"],
+      default: "mixed",
+    },
+    aiSummary: { type: String, default: "" },
+    reportId: { type: String, default: null, index: true },
   },
   { timestamps: true }
 );
