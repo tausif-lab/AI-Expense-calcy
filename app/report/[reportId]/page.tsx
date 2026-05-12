@@ -76,7 +76,7 @@ export default async function ReportPage({
           </a>
         </div>
 
-        {/* AI-generated summary */}
+        {/* AI-generated summary 
         {publicAudit.aiSummary && (
           <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
             <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
@@ -86,7 +86,156 @@ export default async function ReportPage({
               {publicAudit.aiSummary}
             </p>
           </div>
-        )}
+        )}*/}
+
+        {/* Formal Report — Client Info + AI Analysis */}
+<div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
+  {/* Report Header */}
+  <div className="bg-gray-900 text-white px-8 py-6">
+    <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1">
+      Credex · AI Spend Audit Report
+    </p>
+    <h2 className="text-xl font-bold">Confidential Audit Report</h2>
+    <p className="text-gray-400 text-xs mt-1">
+      Generated {new Date(publicAudit.createdAt).toLocaleDateString("en-US", {
+        year: "numeric", month: "long", day: "numeric"
+      })} · Report ID: {resolvedParams.reportId}
+    </p>
+  </div>
+
+  {/* Client Profile Table */}
+  <div className="px-8 py-6 border-b border-gray-100">
+    <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
+      Client Profile
+    </p>
+    <div className="grid grid-cols-2 gap-3 text-sm">
+      {[
+        ["Company Stage", publicAudit.companyStage || "—"],
+        ["Team Size", `${publicAudit.teamSize} people`],
+        ["Tech Team Size", `${publicAudit.techTeamSize} people`],
+        ["Primary Use Case", publicAudit.primaryUseCase],
+        ["Direct API Usage", publicAudit.hasApiUsage ? "Yes" : "No"],
+        ["Tools Audited", `${(publicAudit.tools ?? []).length} tools`],
+      ].map(([label, value]) => (
+        <div key={label} className="flex flex-col gap-0.5">
+          <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">{label}</span>
+          <span className="font-semibold text-gray-900">{value}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+
+  {/* Tools Used Table */}
+  <div className="px-8 py-6 border-b border-gray-100">
+    <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
+      Tools & Plans
+    </p>
+    <table className="w-full text-sm">
+      <thead>
+        <tr className="border-b border-gray-100">
+          <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">Tool</th>
+          <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">Plan</th>
+          <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">Seats</th>
+          <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">Active</th>
+          <th className="text-right pb-2 text-xs text-gray-400 font-bold uppercase">Monthly</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-gray-50">
+        {(publicAudit.tools ?? []).map((tool: any, i: number) => (
+          <tr key={i}>
+            <td className="py-2.5 font-semibold text-gray-900">{tool.name}</td>
+            <td className="py-2.5 text-gray-500">{tool.plan}</td>
+            <td className="py-2.5 text-gray-500">{tool.seats}</td>
+            <td className="py-2.5 text-gray-500">{tool.activeUsers}</td>
+            <td className="py-2.5 text-right font-semibold">${tool.monthlySpend}</td>
+          </tr>
+        ))}
+        <tr className="border-t-2 border-gray-200">
+          <td colSpan={4} className="py-2.5 font-bold text-gray-900">Total</td>
+          <td className="py-2.5 text-right font-bold text-gray-900">${publicAudit.totalMonthlySpend}/mo</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  {/* AI-generated formal report body */}
+  {publicAudit.aiSummary && (
+    <div className="px-8 py-6 border-b border-gray-100">
+      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
+        Analyst Report
+      </p>
+      <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed space-y-4">
+        {publicAudit.aiSummary.split("\n\n").filter(Boolean).map((para: string, i: number) => (
+          <p key={i}>{para}</p>
+        ))}
+      </div>
+    </div>
+  )}
+
+  {/* Findings Summary inside report */}
+  <div className="px-8 py-6">
+    <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
+      Detailed Findings
+    </p>
+    <div className="space-y-4">
+      {(publicAudit.findings ?? []).map((finding: any, i: number) => (
+        <div key={i} className="border border-gray-100 rounded-xl p-4">
+          <div className="flex justify-between items-start mb-2">
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${severityDot[finding.severity] || "bg-gray-400"}`} />
+              <span className="font-bold text-gray-900 text-sm">{finding.toolName}</span>
+              <span className="text-gray-400 text-xs">· {finding.plan}</span>
+            </div>
+            {finding.estimatedMonthlySaving > 0 && (
+              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                Save ${finding.estimatedMonthlySaving}/mo
+              </span>
+            )}
+          </div>
+          <p className="text-sm font-semibold text-gray-800">{finding.recommendedAction}</p>
+          <p className="text-xs text-gray-500 mt-1">{finding.reason}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>
+
+{/* Credex Ad — always shown */}
+<div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-3xl p-8">
+  <div className="flex items-start gap-4">
+    <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+      C
+    </div>
+    <div className="flex-1">
+      <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1">
+        Credex · credex.rocks
+      </p>
+      <h3 className="text-lg font-bold mb-2">
+        Buy discounted AI credits — same tools, lower price
+      </h3>
+      <p className="text-gray-300 text-sm leading-relaxed mb-4">
+        Credex sources surplus AI infrastructure credits from companies that overforecast — 
+        Cursor, Claude, ChatGPT Enterprise, Gemini, GitHub Copilot and more. 
+        The discount is real and substantial. Your team pays retail. You don't have to.
+      </p>
+      {publicAudit.isHighSavings && (
+        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 mb-4">
+          <p className="text-emerald-300 text-sm font-semibold">
+            💡 Your audit shows ${publicAudit.totalMonthlySavings}/mo in savings potential — 
+            a Credex consultation is free and could capture this immediately.
+          </p>
+        </div>
+      )}
+      <a
+        href="https://credex.rocks"
+        target="_blank"
+        className="inline-block bg-emerald-500 text-white text-sm font-bold px-6 py-3 rounded-full hover:bg-emerald-400 transition-all"
+      >
+        Get Discounted AI Credits →
+      </a>
+    </div>
+  </div>
+</div>
 
         {/* Spend vs Savings overview */}
         <div className="grid grid-cols-2 gap-4">
@@ -114,7 +263,7 @@ export default async function ReportPage({
           </div>
         </div>
 
-        {/* Credex CTA for high savings */}
+        {/* Credex CTA for high savings *
         {publicAudit.isHighSavings && (
           <div className="bg-black text-white rounded-3xl p-8">
             <p className="font-bold text-lg">
@@ -131,9 +280,9 @@ export default async function ReportPage({
               Book Free Consultation →
             </a>
           </div>
-        )}
+        )}*/}
 
-        {/* Per-tool findings */}
+        {/* Per-tool findings *
         <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
           <div className="p-6 border-b border-gray-100">
             <h2 className="font-bold text-lg">Audit Findings</h2>
@@ -171,7 +320,7 @@ export default async function ReportPage({
               </div>
             ))}
           </div>
-        </div>
+        </div>*/}
 
         {/* Shareable link */}
         <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm text-center space-y-2">

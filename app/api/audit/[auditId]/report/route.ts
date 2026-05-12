@@ -26,6 +26,7 @@ export async function POST(
     }
 
     // ── Gemini prompt ──────────────────────────────────────────
+    /*
     const topFindings = audit.findings
       .filter((f: any) => f.severity === "high" || f.severity === "medium")
       .slice(0, 3)
@@ -42,7 +43,50 @@ Their total monthly AI spend is $${audit.totalMonthlySpend}.
 Top findings: ${topFindings || "spend appears optimized"}.
 Potential monthly savings: $${audit.totalMonthlySavings}.
 Primary use case: ${audit.primaryUseCase}.
-Write directly to the user ("your team", "you"). Be specific, use the numbers. Mention Credex as a way to capture savings through discounted AI credits if savings > $200/mo. End with one clear next step. Do not use bullet points. Plain paragraph only.`;
+Write directly to the user ("your team", "you"). Be specific, use the numbers. Mention Credex as a way to capture savings through discounted AI credits if savings > $200/mo. End with one clear next step. Do not use bullet points. Plain paragraph only.`;*/
+   // ── Gemini prompt — 200+ word formal report ────────────────
+const topFindings = audit.findings
+  .filter((f: any) => f.severity === "high" || f.severity === "medium")
+  .slice(0, 5)
+  .map((f: any, idx: number) =>
+    `${idx + 1}. ${f.toolName} (${f.plan}): ${f.recommendedAction}. ${f.reason} Estimated saving: $${f.estimatedMonthlySaving}/mo.`
+  )
+  .join("\n");
+
+const allTools = audit.tools
+  .map((t: any) =>
+    `${t.name} ${t.plan} — ${t.seats} seat(s), ${t.activeUsers} active, $${t.monthlySpend}/mo, ${t.billingCycle} billing, used for ${t.primaryFeatureUsed} at ${t.intensity} intensity`
+  )
+  .join("\n");
+
+const prompt = `You are a senior AI infrastructure cost analyst writing a formal audit report.
+
+Write a professional 200–250 word audit report for the following client:
+
+CLIENT PROFILE:
+- Company stage: ${audit.companyStage}
+- Total team size: ${audit.teamSize} people
+- Tech team size: ${audit.techTeamSize} people
+- Primary use case: ${audit.primaryUseCase}
+- Has direct API usage: ${audit.hasApiUsage ? "Yes" : "No"}
+
+AI TOOLS IN USE:
+${allTools}
+
+TOTAL MONTHLY AI SPEND: $${audit.totalMonthlySpend} ($${audit.totalMonthlySpend * 12}/yr)
+POTENTIAL MONTHLY SAVINGS: $${audit.totalMonthlySavings} ($${audit.totalAnnualSavings}/yr)
+
+KEY FINDINGS:
+${topFindings || "No critical issues found. Spend appears optimized."}
+
+INSTRUCTIONS:
+- Write in formal report style with clear paragraphs: Executive Summary, Key Findings, Recommendations, Next Steps
+- Address the user directly ("your team", "you")
+- Use all the numbers above — be specific
+- If savings > $200/mo, mention Credex (credex.rocks) as a way to capture savings through discounted AI credits sourced from companies that overforecast
+- End with one clear, actionable next step
+- Do NOT use bullet points or markdown — plain paragraphs only
+- Minimum 200 words`;
 
     // ── Call Gemini ────────────────────────────────────────────
     let aiSummary = "";
@@ -54,7 +98,7 @@ Write directly to the user ("your team", "you"). Be specific, use the numbers. M
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 200, temperature: 0.7 },
+            generationConfig: { maxOutputTokens: 500, temperature: 0.6 },
           }),
         }
       );
@@ -164,6 +208,33 @@ Write directly to the user ("your team", "you"). Be specific, use the numbers. M
       // Report is already saved — user can still get the URL from the UI
       console.error("[Resend] Email send failed:", emailErr);
     }
+    // ── Notify admin ───────────────────────────────────────────
+try {
+  await resend.emails.send({
+    from: "Credex Audit <onboarding@resend.dev>",
+    to: process.env.ADMIN_EMAIL as string,
+    subject: `New audit report — ${email}`,
+    html: `
+      <div style="font-family: monospace; padding: 24px; background: #f9fafb;">
+        <h2 style="margin: 0 0 16px;">New Audit Report Generated</h2>
+        <table style="border-collapse: collapse; width: 100%;">
+          <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">User Email</td><td style="padding: 6px 12px;">${email}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">Company Stage</td><td style="padding: 6px 12px;">${audit.companyStage}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">Team Size</td><td style="padding: 6px 12px;">${audit.teamSize} total / ${audit.techTeamSize} tech</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">Primary Use Case</td><td style="padding: 6px 12px;">${audit.primaryUseCase}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">Tools</td><td style="padding: 6px 12px;">${audit.tools.map((t: any) => `${t.name} ${t.plan} (${t.seats} seats, $${t.monthlySpend}/mo)`).join(", ")}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">Monthly Spend</td><td style="padding: 6px 12px;">$${audit.totalMonthlySpend}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">Potential Savings</td><td style="padding: 6px 12px; color: #059669; font-weight: bold;">$${audit.totalMonthlySavings}/mo ($${audit.totalAnnualSavings}/yr)</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">High Savings?</td><td style="padding: 6px 12px;">${audit.isHighSavings ? "✅ YES — qualify for Credex consultation" : "No"}</td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">Report URL</td><td style="padding: 6px 12px;"><a href="${reportUrl}">${reportUrl}</a></td></tr>
+        </table>
+        <p style="margin: 16px 0 0; font-size: 12px; color: #9ca3af;">Audit ID: ${auditId}</p>
+      </div>
+    `,
+  });
+} catch (adminEmailErr) {
+  console.error("[Resend] Admin notification failed:", adminEmailErr);
+}
 
     return NextResponse.json({ success: true, reportId }, { status: 200 });
   } catch (error) {
