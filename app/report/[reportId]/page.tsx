@@ -2,6 +2,7 @@
 import { connectDB } from "@/config/config";
 import { Audit } from "@/app/models/audit.model";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 
 // OG tags for shareable link previews
 export async function generateMetadata({ params }: { params: Promise<{ reportId: string }> }) {
@@ -68,12 +69,12 @@ export default async function ReportPage({
               {publicAudit.teamSize} team members · {publicAudit.primaryUseCase} · {publicAudit.companyStage}
             </p>
           </div>
-          <a
+          <Link
             href="/"
             className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-full hover:bg-emerald-100 transition-all"
           >
             Audit your stack →
-          </a>
+          </Link>
         </div>
 
         {/* AI-generated summary 
@@ -216,7 +217,7 @@ export default async function ReportPage({
       <p className="text-gray-300 text-sm leading-relaxed mb-4">
         Credex sources surplus AI infrastructure credits from companies that overforecast — 
         Cursor, Claude, ChatGPT Enterprise, Gemini, GitHub Copilot and more. 
-        The discount is real and substantial. Your team pays retail. You don't have to.
+        The discount is real and substantial. Your team pays retail. You do not have to.
       </p>
       {publicAudit.isHighSavings && (
         <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 mb-4">
@@ -226,13 +227,13 @@ export default async function ReportPage({
           </p>
         </div>
       )}
-      <a
+      <Link
         href="https://credex.rocks"
         target="_blank"
         className="inline-block bg-emerald-500 text-white text-sm font-bold px-6 py-3 rounded-full hover:bg-emerald-400 transition-all"
       >
         Get Discounted AI Credits →
-      </a>
+      </Link>
     </div>
   </div>
 </div>
@@ -334,12 +335,12 @@ export default async function ReportPage({
         </div>
 
         <div className="text-center pt-2">
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 bg-black text-white px-8 py-3 rounded-full font-bold hover:bg-gray-800 transition-all"
           >
             Audit a new stack
-          </a>
+          </Link>
         </div>
 
       </div>

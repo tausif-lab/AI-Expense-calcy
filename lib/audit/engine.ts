@@ -797,7 +797,7 @@ function checkCrossToolRedundancy(
       recommendedAction: "Claude subscription + Anthropic API — consolidate to one billing method",
       estimatedMonthlySaving: sub.monthlySpend,
       severity: "high",
-      reason: `Claude.ai subscription ($${sub.monthlySpend}/mo) and Anthropic API are completely separate billing systems. Teams building with the API directly don't need the UI subscription — API-only is typically more cost-efficient for engineering teams.`,
+      reason: `Claude.ai subscription ($${sub.monthlySpend}/mo) and Anthropic API are completely separate billing systems. Teams building with the API directly do not need the UI subscription — API-only is typically more cost-efficient for engineering teams.`,
       tags: ["redundant", "double-billing"],
     });
   }
@@ -812,7 +812,7 @@ function checkCrossToolRedundancy(
     findings.push({
       toolName: "ChatGPT", plan: sub.plan, currentSpend: sub.monthlySpend,
       inferredSpend: sub.monthlySpend,
-      recommendedAction: "ChatGPT subscription + OpenAI API — pick one, don't pay for both",
+      recommendedAction: "ChatGPT subscription + OpenAI API — pick one, do not pay for both",
       estimatedMonthlySaving: sub.monthlySpend,
       severity: "medium",
       reason: `You're paying for a ChatGPT subscription ($${sub.monthlySpend}/mo) and OpenAI API separately. Developers using the API directly rarely need the ChatGPT UI subscription — consolidating to API-only removes the duplicate cost.`,

@@ -167,10 +167,10 @@ INSTRUCTIONS:
                 </div>
 
                 <!-- CTA Button -->
-                <a href="${reportUrl}" 
+                <Link href="${reportUrl}" 
                    style="display: block; background: #111827; color: white; text-align: center; padding: 16px 24px; border-radius: 50px; font-weight: 700; font-size: 14px; text-decoration: none; margin-bottom: 16px;">
                   View Full Report →
-                </a>
+                </Link>
 
                 <!-- Shareable link note -->
                 <p style="color: #9CA3AF; font-size: 12px; text-align: center; margin: 0 0 24px;">
@@ -186,10 +186,10 @@ INSTRUCTIONS:
                   <p style="color: #9CA3AF; font-size: 12px; margin: 0 0 12px; line-height: 1.5;">
                     With $${audit.totalMonthlySavings}/mo in savings potential, our team can help you capture these savings through discounted AI credits.
                   </p>
-                  <a href="https://credex.rocks" 
+                  <Link href="https://credex.rocks" 
                      style="display: inline-block; background: #10B981; color: white; padding: 10px 20px; border-radius: 50px; font-weight: 700; font-size: 12px; text-decoration: none;">
                     Book Free Consultation →
-                  </a>
+                  </Link>
                 </div>
                 ` : ""}
 
@@ -226,7 +226,7 @@ try {
           <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">Monthly Spend</td><td style="padding: 6px 12px;">$${audit.totalMonthlySpend}</td></tr>
           <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">Potential Savings</td><td style="padding: 6px 12px; color: #059669; font-weight: bold;">$${audit.totalMonthlySavings}/mo ($${audit.totalAnnualSavings}/yr)</td></tr>
           <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">High Savings?</td><td style="padding: 6px 12px;">${audit.isHighSavings ? "✅ YES — qualify for Credex consultation" : "No"}</td></tr>
-          <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">Report URL</td><td style="padding: 6px 12px;"><a href="${reportUrl}">${reportUrl}</a></td></tr>
+          <tr><td style="padding: 6px 12px; font-weight: bold; background: #f3f4f6;">Report URL</td><td style="padding: 6px 12px;"><Link href="${reportUrl}">${reportUrl}</Link></td></tr>
         </table>
         <p style="margin: 16px 0 0; font-size: 12px; color: #9ca3af;">Audit ID: ${auditId}</p>
       </div>

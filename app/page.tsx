@@ -28,9 +28,9 @@ export default function LandingPage() {
             <span className="font-bold text-xl tracking-tight">Credex Audit</span>
           </div>
           <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
-            <a href="#problem" className="hover:text-gray-900 transition-colors">The Problem</a>
-            <a href="#how-it-works" className="hover:text-gray-900 transition-colors">How it Works</a>
-            <a href="#features" className="hover:text-gray-900 transition-colors">Features</a>
+            <Link href="#problem" className="hover:text-gray-900 transition-colors">The Problem</Link>
+            <Link href="#how-it-works" className="hover:text-gray-900 transition-colors">How it Works</Link>
+            <Link href="#features" className="hover:text-gray-900 transition-colors">Features</Link>
           </div>
           <div>
             <Link href="/audit">
@@ -275,9 +275,9 @@ export default function LandingPage() {
             © {new Date().getFullYear()} Credex Audit. All rights reserved.
           </div>
           <div className="flex gap-6 text-sm text-gray-500">
-            <a href="#" className="hover:text-gray-900">Twitter</a>
-            <a href="#" className="hover:text-gray-900">Terms</a>
-            <a href="#" className="hover:text-gray-900">Privacy</a>
+            <Link href="#" className="hover:text-gray-900">Twitter</Link>
+            <Link href="#" className="hover:text-gray-900">Terms</Link>
+            <Link href="#" className="hover:text-gray-900">Privacy</Link>
           </div>
         </div>
       </footer>

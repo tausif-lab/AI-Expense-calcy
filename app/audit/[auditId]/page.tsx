@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { div } from "framer-motion/client";
-
+import Link from "next/link";
 
 interface ToolInput {
   name: string;
@@ -99,9 +99,9 @@ const [emailError, setEmailError] = useState("");
           <p className="text-red-500 font-semibold text-lg">
             {error || "Audit not found"}
           </p>
-          <a href="/" className="text-emerald-600 underline text-sm">
+          <Link href="/" className="text-emerald-600 underline text-sm">
             Start a new audit
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -190,13 +190,13 @@ const [emailError, setEmailError] = useState("");
           With $500+/mo in savings potential, our team can help you capture
           these savings through discounted AI credits.
         </p>
-         <a
+         <Link
           href="https://credex.rocks"
           target="_blank"
           className="inline-block mt-3 bg-emerald-600 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-emerald-700 transition-all"
         >
           Book a Free Consultation →
-        </a>
+        </Link>
       </div>
     )}
   </div>
@@ -288,13 +288,13 @@ const [emailError, setEmailError] = useState("");
       <p className="text-sm font-semibold text-gray-800">
         ✅ Your report is ready!
       </p>
-      <a
+      <Link
         href={reportUrl}
         target="_blank"
         className="text-emerald-600 underline text-sm break-all mt-1 block"
       >
         {reportUrl}
-      </a>
+      </Link>
       <p className="text-xs text-gray-400 mt-2">
         Bookmark this link — it works anytime, from anywhere.
       </p>
@@ -305,12 +305,12 @@ const [emailError, setEmailError] = useState("");
 
         {/* Start New Audit */}
         <div className="text-center pt-4">
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-2 bg-black text-white px-8 py-3 rounded-full font-bold hover:bg-gray-800 transition-all"
           >
             Start a New Audit
-          </a>
+          </Link>
         </div>
       </div>
     </div>
