@@ -15,17 +15,17 @@ Users can generate audits instantly without authentication, receive AI-generated
 
 # Live Deployment
 
-```text
+
 https://ai-expense-calcy.vercel.app
-```
+
 
 ---
 
 # Demo Video
 
-```text
+
 https://youtu.be/gZqtizIjhpU
-```
+
 
 ---
 
