@@ -40,7 +40,7 @@ and instantly shows where you're overspending.
 📸 Add analytics screenshot here:
 
 ```md
-![Audit Analysis](./public/tweet-2.png)
+![Audit Analysis](./screenshots/tweet-2.png)
 ```
 
 ---
