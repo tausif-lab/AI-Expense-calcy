@@ -34,7 +34,7 @@ https://youtu.be/gZqtizIjhpU
 ## Audit-Input Fields
 
 ![Input Fields 1](./screenshots/input-1.png)
-(./screenshots/input-2.png)
+![Input Fields 2](./screenshots/input-2.png)
 
 
 ---
