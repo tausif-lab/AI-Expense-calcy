@@ -3,6 +3,7 @@ import { connectDB } from "@/config/config";
 import { Audit } from "@/app/models/audit.model";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import DownloadPDFButton from "./DownloadPDFButton";
 
 // OG tags for shareable link previews
 export async function generateMetadata({ params }: { params: Promise<{ reportId: string }> }) {
@@ -54,7 +55,7 @@ export default async function ReportPage({
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] py-12 px-4 sm:px-6">
-      <div className="max-w-3xl mx-auto space-y-8">
+      <div id="pdf-report-content" className="max-w-3xl mx-auto space-y-8">
 
         {/* Header */}
         <div className="flex items-start justify-between">
@@ -69,25 +70,18 @@ export default async function ReportPage({
               {publicAudit.teamSize} team members · {publicAudit.primaryUseCase} · {publicAudit.companyStage}
             </p>
           </div>
-          <Link
-            href="/"
-            className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-full hover:bg-emerald-100 transition-all"
-          >
-            Audit your stack →
-          </Link>
+          <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+            <DownloadPDFButton reportId={resolvedParams.reportId} />
+            <Link
+              href="/"
+              className="text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-4 py-2 rounded-full hover:bg-emerald-100 transition-all"
+            >
+              Audit your stack →
+            </Link>
+          </div>
         </div>
 
-        {/* AI-generated summary 
-        {publicAudit.aiSummary && (
-          <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
-            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
-              AI Analysis
-            </p>
-            <p className="text-gray-800 leading-relaxed text-base">
-              {publicAudit.aiSummary}
-            </p>
-          </div>
-        )}*/}
+        
 
         {/* Formal Report — Client Info + AI Analysis */}
 <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
@@ -264,64 +258,7 @@ export default async function ReportPage({
           </div>
         </div>
 
-        {/* Credex CTA for high savings *
-        {publicAudit.isHighSavings && (
-          <div className="bg-black text-white rounded-3xl p-8">
-            <p className="font-bold text-lg">
-              💡 You could save ${publicAudit.totalMonthlySavings}/mo
-            </p>
-            <p className="text-gray-300 text-sm mt-2">
-              Credex sells discounted AI infrastructure credits — Cursor, Claude, ChatGPT Enterprise and others — at substantial discounts. Your audit qualifies for a free consultation.
-            </p>
-            <a
-              href="https://credex.rocks"
-              target="_blank"
-              className="inline-block mt-4 bg-emerald-500 text-white text-sm font-bold px-6 py-3 rounded-full hover:bg-emerald-400 transition-all"
-            >
-              Book Free Consultation →
-            </a>
-          </div>
-        )}*/}
-
-        {/* Per-tool findings *
-        <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
-          <div className="p-6 border-b border-gray-100">
-            <h2 className="font-bold text-lg">Audit Findings</h2>
-            <p className="text-gray-400 text-sm mt-0.5">
-              {(publicAudit.tools ?? []).length} tool{(publicAudit.tools ?? []).length !== 1 ? "s" : ""} analysed
-            </p>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {(publicAudit.findings ?? []).map((finding: any, i: number) => (
-              <div key={i} className="p-6">
-                <div className="flex justify-between items-start">
-                  <div className="flex items-center gap-3">
-                    <span className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${severityDot[finding.severity] || "bg-gray-400"}`} />
-                    <div>
-                      <p className="font-bold text-gray-900">{finding.toolName}</p>
-                      <p className="text-sm text-gray-500">
-                        {finding.plan} · ${finding.currentSpend}/mo
-                      </p>
-                    </div>
-                  </div>
-                  {finding.estimatedMonthlySaving > 0 ? (
-                    <span className="text-sm font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">
-                      Save ${finding.estimatedMonthlySaving}/mo
-                    </span>
-                  ) : (
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full border ${severityColor[finding.severity] || ""}`}>
-                      {finding.severity === "optimal" ? "✓ Optimal" : finding.severity.toUpperCase()}
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm font-semibold text-gray-800 mt-3">
-                  {finding.recommendedAction}
-                </p>
-                <p className="text-xs text-gray-400 mt-1">{finding.reason}</p>
-              </div>
-            ))}
-          </div>
-        </div>*/}
+       
 
         {/* Shareable link */}
         <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm text-center space-y-2">

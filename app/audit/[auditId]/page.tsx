@@ -137,7 +137,7 @@ const [emailError, setEmailError] = useState("");
           <p className="text-xs font-bold uppercase tracking-widest text-emerald-500">
             Audit Complete
           </p>
-          <h1 className="text-3xl font-bold tracking-tight mt-1">
+          <h1 className="text-3xl text-black font-bold tracking-tight mt-1">
             Your AI Spend Report
           </h1>
           <p className="text-gray-500 mt-2">
@@ -215,7 +215,7 @@ const [emailError, setEmailError] = useState("");
 {/* Per-tool findings */}
 <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
   <div className="p-6 border-b border-gray-100">
-    <h2 className="font-bold text-lg">Audit Findings</h2>
+    <h2 className="font-bold text-lg text-black">Audit Findings</h2>
   </div>
   <div className="divide-y divide-gray-100">
     {audit.findings.map((finding, i) => (
@@ -260,7 +260,7 @@ const [emailError, setEmailError] = useState("");
 
 {/* Email capture */}
 <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
-  <h2 className="font-bold text-lg">Get your AI-generated report</h2>
+  <h2 className="font-bold text-lg text-black">Get your AI-generated report</h2>
   <p className="text-gray-400 text-sm mt-1">
     Enter your email and we'll generate a personalised 100-word AI analysis of your audit.
   </p>
@@ -270,7 +270,7 @@ const [emailError, setEmailError] = useState("");
       value={email}
       onChange={(e) => setEmail(e.target.value)}
       placeholder="you@company.com"
-      className="flex-1 p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
+      className="flex-1 p-3 rounded-xl border border-gray-200 text-black focus:ring-2 focus:ring-emerald-500 outline-none text-sm"
     />
     <button
       onClick={handleEmailSubmit}

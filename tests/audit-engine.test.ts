@@ -1,29 +1,18 @@
-// auditengine.test.ts
-// Covers the 5 required audit engine scenarios for TESTS.md
-// Run with: npx vitest run auditengine.test.ts
-//
-// ⚠️  Values mirror exactly what page.tsx (the form) sends to the engine:
-//   intensity  → "Light" | "Medium" | "Heavy"   (form renders these three options)
-//   usage      → "Coding" | "Writing" | "Research" | "Analysis"
-//   primaryFeatureUsed → "autocomplete" | "chat" | "agents" | "api-calls" | "docs" | "review"
-//   billingCycle       → "monthly" | "annual"
-//   contractStatus     → "month-to-month" | "in-annual-contract" | "contract-ending-soon"
+
 
 import { describe, it, expect } from "vitest";
 import { runAuditEngine } from "../lib/audit/engine";
 
-// ─────────────────────────────────────────────
-// HELPERS — defaults match the form's defaultValues
-// ─────────────────────────────────────────────
+
 const baseForm = {
   teamSize: 10,
   techTeamSize: 5,
-  primaryUseCase: "Coding", // matches form Step 1 dropdown
+  primaryUseCase: "Coding", 
   hasApiUsage: false,
   companyStage: "Early (11–30)",
 };
 
-/** Build a tool entry exactly as the form would POST it */
+
 function makeTool(overrides: object) {
   return {
     // form defaultValues for the first tool card (Cursor Pro)
