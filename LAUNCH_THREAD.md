@@ -19,9 +19,9 @@ So I built a free AI Spend Audit tool.
 
 📸 Add screenshot/image here:
 
-```md
+
 ![AI Spend Audit Dashboard](public/tweet-1.png)
-```
+
 
 ---
 
@@ -39,9 +39,9 @@ and instantly shows where you're overspending.
 
 📸 Add analytics screenshot here:
 
-```md
+
 ![Audit Analysis](./screenshots/tweet-2.png)
-```
+
 
 ---
 
@@ -57,9 +57,9 @@ was wasting over $180/month in duplicated tooling and unused seats.
 
 📸 Add savings report screenshot here:
 
-```md
+
 ![Savings Report](./public/tweet-3.png)
-```
+
 
 ---
 
@@ -75,9 +75,9 @@ No login required.
 
 📸 Add generated report screenshot here:
 
-```md
+
 ![Generated Report](./public/tweet-4.png)
-```
+
 
 ---
 
@@ -87,9 +87,9 @@ One thing I noticed while building this:
 Most founders don’t actually know their total monthly AI spend.
 
 They just keep adding subscriptions over time.
-```md
+
 ![Public Share Link](./public/tweet-5.png)
-```
+
 ---
 
 6/
@@ -98,9 +98,9 @@ The audit engine is deterministic and pricing-based.
 I intentionally avoided using AI for financial calculations because recommendations should be explainable and testable.
 
 AI is only used for personalized report summaries.
-```md
+
 ![Public Share Link](./public/tweet-6.png)
-```
+
 ---
 
 7/
@@ -110,7 +110,7 @@ The goal is to make AI infrastructure spending more transparent.
 
 📸 Add public share page screenshot here:
 
-```md
+
 ![Public Share Link](./public/tweet-7.png)
-```
+
 
