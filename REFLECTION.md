@@ -29,9 +29,14 @@ The change also aligned more closely with the business goal of the product, sinc
 
 ## 3. What you would build in week 2 if you had it
 
-If I had another week, I would focus on improving the depth and credibility of the audit system. I would add benchmark analysis such as “AI spend per developer compared to similar startups.” I would also improve the recommendation engine by tracking overlapping tooling categories more intelligently.
+If I had another week, I would focus on improving the intelligence and realism of the audit engine instead of adding unrelated features. Based on the user interviews, I realized different types of users think about AI spending very differently, so I would improve the recommendation system by making it more context-aware for technical teams, product managers, and non-technical users.
 
-On the product side, I would add PDF export support, analytics dashboards, and better onboarding for founders unfamiliar with AI infrastructure pricing. I would also improve public share pages with richer Open Graph previews and more polished visual reporting.
+I would add benchmark analysis such as “AI spend per developer compared to similar startups” and improve overlap detection between subscriptions like Claude, ChatGPT, Cursor, and Copilot. I would also add more pricing intelligence around API usage and seat utilization patterns.
+
+On the product side, I would improve the public share pages with richer Open Graph previews and more polished report layouts for screenshots and sharing. I would also strengthen the lead-generation workflow by supporting proper production-grade transactional email delivery with verified domains instead of the simplified MVP notification setup currently used.
+
+Finally, I would improve the PDF export experience and add lightweight analytics dashboards showing common overspending patterns across generated audits.
+
 
 ---
 
