@@ -20,7 +20,7 @@ So I built a free AI Spend Audit tool.
 📸 Add screenshot/image here:
 
 ```md
-![AI Spend Audit Dashboard](./public/tweet-1.png)
+![AI Spend Audit Dashboard](public/tweet-1.png)
 ```
 
 ---
