@@ -4,6 +4,7 @@ import { connectDB } from "@/config/config";
 import { Audit } from "@/app/models/audit.model";
 import { nanoid } from "nanoid";
 import { runAuditEngine } from "@/lib/audit/engine";
+import { OFFICIAL_PRICES } from "@/lib/audit/engine";
 export async function POST(req: NextRequest) {
   try {
     await connectDB();
@@ -62,6 +63,7 @@ export async function POST(req: NextRequest) {
   totalAnnualSavings: auditResult.totalAnnualSavings,
   isHighSavings: auditResult.isHighSavings,
   overallStatus: auditResult.overallStatus,
+  pricingSnapshot: JSON.parse(JSON.stringify(OFFICIAL_PRICES)), 
 });
 
     return NextResponse.json(
