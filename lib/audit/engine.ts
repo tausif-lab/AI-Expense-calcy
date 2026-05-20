@@ -32,7 +32,7 @@ export interface AuditResult {
 // Source: PRICING_DATA.md, verified May 10 2026
 // 0 = free or usage-based (no fixed seat price)
 // ─────────────────────────────────────────────
-const OFFICIAL_PRICES: Record<string, Record<string, number>> = {
+export const OFFICIAL_PRICES: Record<string, Record<string, number>> = {
   Cursor: {
     Hobby: 0,
     Pro: 20,
@@ -50,7 +50,7 @@ const OFFICIAL_PRICES: Record<string, Record<string, number>> = {
     Free: 0,
     Pro: 20,
     "Max 5x": 100,
-    "Max 20x": 200,
+    "Max 20x": 800,
     Team: 25,
     Enterprise: 0, // custom
     "API Direct": 0, // usage-based
