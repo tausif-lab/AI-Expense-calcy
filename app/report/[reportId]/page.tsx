@@ -71,6 +71,12 @@ export default async function ReportPage({
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+            <a
+              href={`/api/audit/${publicAudit.auditId}/reaudit`}
+              className="text-xs font-bold text-white bg-emerald-600 border border-emerald-600 px-4 py-2 rounded-full hover:bg-emerald-700 transition-all"
+            >
+              Re-Audit Now →
+            </a>
             <DownloadPDFButton reportId={resolvedParams.reportId} />
             <Link
               href="/"
@@ -259,6 +265,53 @@ export default async function ReportPage({
         </div>
 
        
+
+        {/* Re-Audit History */}
+        {publicAudit.reAuditHistory && publicAudit.reAuditHistory.length > 0 && (
+          <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">
+              Price Change History
+            </p>
+            <div className="space-y-4">
+              {publicAudit.reAuditHistory.map((entry: any, idx: number) => (
+                <div key={idx} className="border border-gray-100 rounded-xl p-4 bg-gray-50">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {new Date(entry.triggeredAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit"
+                        })}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Changed: <span className="font-semibold">{entry.changedTools.join(", ")}</span>
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-gray-400">Savings Impact</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-sm text-gray-600">${entry.oldTotalMonthlySavings}/mo</span>
+                        <span className="text-gray-400">→</span>
+                        <span className={`text-sm font-bold ${
+                          entry.newTotalMonthlySavings > entry.oldTotalMonthlySavings 
+                            ? "text-emerald-600" 
+                            : entry.newTotalMonthlySavings < entry.oldTotalMonthlySavings
+                            ? "text-red-600"
+                            : "text-gray-600"
+                        }`}>
+                          ${entry.newTotalMonthlySavings}/mo
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Shareable link */}
         <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm text-center space-y-2">

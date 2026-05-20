@@ -35,8 +35,8 @@ export interface AuditResult {
 export const OFFICIAL_PRICES: Record<string, Record<string, number>> = {
   Cursor: {
     Hobby: 0,
-    Pro: 20,
-    Business: 40,
+    Pro: 15,
+    Business: 99,
     Enterprise: 0, // custom — usage-based
   },
   "GitHub Copilot": {

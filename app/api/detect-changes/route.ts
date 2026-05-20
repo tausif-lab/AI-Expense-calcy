@@ -23,13 +23,23 @@ function comparePrices(
   }
   return changedTools;
 }
-export async function POST(req: NextRequest) {
+export async function POST(_req: NextRequest) {
   try {
+    // Check environment variables first
+    if (!process.env.MONGODB_URI) {
+      console.error("[detect-changes] MONGODB_URI is not set");
+      return NextResponse.json({ 
+        error: "Database configuration missing",
+        message: "MONGODB_URI environment variable is not set",
+        hint: "Create .env.local file with MONGODB_URI. See SETUP_INSTRUCTIONS.md"
+      }, { status: 500 });
+    }
+
     await connectDB();
     // Only audits that have a snapshot and an email (so we can notify)
     const audits = await Audit.find({
       pricingSnapshot: { $ne: null },
-      
+      email: { $ne: null, $exists: true },
     }).lean() as any[];
 
     console.log("[detect-changes] Total audits with snapshot:", audits.length);
@@ -83,6 +93,7 @@ export async function POST(req: NextRequest) {
 
       // Send email notification
       const reportUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/report/${audit.reportId}`;
+      const reauditUrl = `${process.env.NEXT_PUBLIC_BASE_URL}/api/audit/${audit.auditId}/reaudit`;
       const savingsDiff = newResult.totalMonthlySavings - audit.totalMonthlySavings;
       const savingsLine =
         savingsDiff > 0
@@ -125,9 +136,16 @@ export async function POST(req: NextRequest) {
                     </div>
                   </div>
                   <a href="${reportUrl}"
-                     style="display: block; background: #111827; color: white; text-align: center; padding: 16px 24px; border-radius: 50px; font-weight: 700; font-size: 14px; text-decoration: none; margin-bottom: 24px;">
-                    View Updated Audit →
+                     style="display: block; background: #111827; color: white; text-align: center; padding: 16px 24px; border-radius: 50px; font-weight: 700; font-size: 14px; text-decoration: none; margin-bottom: 12px;">
+                    View Updated Report →
                   </a>
+                  <a href="${reauditUrl}"
+                     style="display: block; background: #10B981; color: white; text-align: center; padding: 16px 24px; border-radius: 50px; font-weight: 700; font-size: 14px; text-decoration: none; margin-bottom: 24px;">
+                    Re-Audit with Latest Data →
+                  </a>
+                  <p style="color: #9CA3AF; font-size: 12px; text-align: center; margin: 0 0 24px;">
+                    Click "Re-Audit" to run a fresh analysis with your current tool usage and the new pricing.
+                  </p>
                   <hr style="border: none; border-top: 1px solid #F3F4F6; margin: 0 0 16px;" />
                   <p style="color: #D1D5DB; font-size: 11px; text-align: center; margin: 0;">
                     Credex · credex.rocks
@@ -147,6 +165,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: true, affectedUsers }, { status: 200 });
   } catch (error) {
     console.error("[POST /api/detect-changes]", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json({ 
+      error: "Internal server error",
+      message: errorMessage,
+      hint: errorMessage.includes("MONGODB_URI") 
+        ? "Check .env.local file exists with MONGODB_URI set" 
+        : "Check server logs for details"
+    }, { status: 500 });
   }
 }
