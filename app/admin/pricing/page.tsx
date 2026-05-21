@@ -1,3 +1,4 @@
+
 import { connectDB } from "@/config/config";
 import { Pricing } from "@/app/models/pricing.model";
 import { Audit } from "@/app/models/audit.model";
@@ -58,9 +59,11 @@ export default async function AdminPricingPage() {
   }));
 
   return (
-    <PricingEditor
-      initialEntries={serialized}
-      reauditActivity={reauditActivity}
-    />
+    <div className="min-h-screen bg-slate-50/50 py-12 px-4 sm:px-6 lg:px-8">
+      <PricingEditor
+        initialEntries={serialized}
+        reauditActivity={reauditActivity}
+      />
+    </div>
   );
 }
