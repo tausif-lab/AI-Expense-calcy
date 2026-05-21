@@ -75,36 +75,33 @@ Purpose:
 flowchart TD
 
 A[User submits audit]
+--> B[Run Audit Engine]
 
---> B[runAuditEngine()]
+B --> C[Audit saved MongoDB]
 
---> C[Audit saved MongoDB]
+C --> D[Pricing Snapshot Stored]
 
---> D[pricingSnapshot stored]
+D --> E[Admin updates pricing]
 
-E[Admin updates pricing]
+E --> F[Pricing Changed Event]
 
---> F[pricing.changed event]
+F --> G[Affected audits detected]
 
---> G[Affected audits detected]
+G --> H[Recalculate findings]
 
---> H[runAuditEngine recalculates findings]
+H --> I[Update ReAudit History]
 
---> I[reAuditHistory updated]
+I --> J[Email notification via Resend]
 
---> J[Email notification via Resend]
-
---> K[User opens re-audit diff page]
-
-D --> G
+J --> K[User opens Re-Audit Diff Page]
 ```
+
 New backend pieces:
 
 - Pricing event processor
 - Pricing update API
 - Re-audit history tracking
 - Email notification flow
-
 # What I cut
 
 - Full production email domain verification flow
