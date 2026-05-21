@@ -25,20 +25,35 @@ const ToolInputSchema = new Schema(
       required: true,
     },
   },
-  { _id: false } // no separate _id per tool subdoc
+  { _id: false }, // no separate _id per tool subdoc
 );
 
 // Add after ToolInputSchema
-const ToolFindingSchema = new Schema({
-  toolName: { type: String, required: true },
-  plan: { type: String, required: true },
-  currentSpend: { type: Number, required: true },
-  recommendedAction: { type: String, required: true },
-  estimatedMonthlySaving: { type: Number, required: true },
-  severity: { type: String, enum: ["high", "medium", "low", "optimal"] },
-  reason: { type: String, required: true },
-}, { _id: false });
+const ToolFindingSchema = new Schema(
+  {
+    toolName: { type: String, required: true },
+    plan: { type: String, required: true },
+    currentSpend: { type: Number, required: true },
+    recommendedAction: { type: String, required: true },
+    estimatedMonthlySaving: { type: Number, required: true },
+    severity: { type: String, enum: ["high", "medium", "low", "optimal"] },
+    reason: { type: String, required: true },
+  },
+  { _id: false },
+);
 
+// Add after ToolFindingSchema
+const ReAuditHistorySchema = new Schema(
+  {
+    triggeredAt: { type: Date, required: true },
+    changedTools: { type: [String], required: true },
+    oldFindings: { type: [ToolFindingSchema], default: [] },
+    newFindings: { type: [ToolFindingSchema], default: [] },
+    oldTotalMonthlySavings: { type: Number, required: true },
+    newTotalMonthlySavings: { type: Number, required: true },
+  },
+  { _id: false },
+);
 
 export interface IAudit extends Document {
   auditId: string;
@@ -56,10 +71,19 @@ export interface IAudit extends Document {
     activeUsers: number;
     monthlySpend: number;
     billingCycle: "monthly" | "annual";
-    contractStatus: "month-to-month" | "in-annual-contract" | "contract-ending-soon";
+    contractStatus:
+      | "month-to-month"
+      | "in-annual-contract"
+      | "contract-ending-soon";
     intensity: string;
     usage: string;
-    primaryFeatureUsed: "autocomplete" | "chat" | "agents" | "api-calls" | "docs" | "review";
+    primaryFeatureUsed:
+      | "autocomplete"
+      | "chat"
+      | "agents"
+      | "api-calls"
+      | "docs"
+      | "review";
   }[];
   // Computed on save
   totalMonthlySpend: number;
@@ -72,6 +96,15 @@ export interface IAudit extends Document {
     estimatedMonthlySaving: number;
     severity: "high" | "medium" | "low" | "optimal";
     reason: string;
+  }[];
+  pricingSnapshot?: Record<string, Record<string, number>>;
+  reAuditHistory?: {
+    triggeredAt: Date;
+    changedTools: string[];
+    oldFindings: IAudit["findings"];
+    newFindings: IAudit["findings"];
+    oldTotalMonthlySavings: number;
+    newTotalMonthlySavings: number;
   }[];
   totalMonthlySavings: number;
   totalAnnualSavings: number;
@@ -116,10 +149,14 @@ const AuditSchema = new Schema<IAudit>(
       enum: ["overspending", "optimized", "mixed"],
       default: "mixed",
     },
+    pricingSnapshot: { type: Schema.Types.Mixed, default: null },
+    reAuditHistory: { type: [ReAuditHistorySchema], default: [] },
     aiSummary: { type: String, default: "" },
     reportId: { type: String, default: null, index: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
+
+AuditSchema.index({ "tools.name": 1 });
 
 export const Audit = models.Audit || model<IAudit>("Audit", AuditSchema);

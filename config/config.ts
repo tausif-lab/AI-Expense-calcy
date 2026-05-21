@@ -7,23 +7,45 @@ if (!MONGODB_URI) {
 }
 
 // Prevent multiple connections in Next.js dev (hot reload)
-declare global {
-  var _mongooseConn: typeof mongoose | null;
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
 }
 
-let cached = global._mongooseConn;
+declare global {
+  var _mongooseCache: MongooseCache | undefined;
+}
 
-if (!cached) {
-  cached = global._mongooseConn = null;
+function getCache(): MongooseCache {
+  if (!global._mongooseCache) {
+    global._mongooseCache = { conn: null, promise: null };
+  }
+  return global._mongooseCache;
 }
 
 export async function connectDB(): Promise<typeof mongoose> {
-  if (cached) return cached;
+  if (mongoose.connection.readyState === 1) {
+    return mongoose;
+  }
 
-  cached = await mongoose.connect(MONGODB_URI, {
-    bufferCommands: false,
-  });
+  const cached = getCache();
 
-  global._mongooseConn = cached;
-  return cached;
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(MONGODB_URI, {
+      bufferCommands: false,
+    }).then((m) => m);
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn as typeof mongoose;
 }

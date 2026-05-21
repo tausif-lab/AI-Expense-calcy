@@ -6,11 +6,16 @@ import Link from "next/link";
 import DownloadPDFButton from "./DownloadPDFButton";
 
 // OG tags for shareable link previews
-export async function generateMetadata({ params }: { params: Promise<{ reportId: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ reportId: string }>;
+}) {
   const resolvedParams = await params;
   return {
     title: "AI Spend Audit Report | Credex",
-    description: "Personalized AI spend analysis — see where your team is overspending on AI tools.",
+    description:
+      "Personalized AI spend analysis — see where your team is overspending on AI tools.",
     openGraph: {
       title: "AI Spend Audit Report | Credex",
       description: "See your personalized AI spend analysis.",
@@ -56,7 +61,6 @@ export default async function ReportPage({
   return (
     <div className="min-h-screen bg-[#FAFAFA] py-12 px-4 sm:px-6">
       <div id="pdf-report-content" className="max-w-3xl mx-auto space-y-8">
-
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
@@ -67,10 +71,17 @@ export default async function ReportPage({
               Your Personalized Audit
             </h1>
             <p className="text-gray-400 text-sm mt-1">
-              {publicAudit.teamSize} team members · {publicAudit.primaryUseCase} · {publicAudit.companyStage}
+              {publicAudit.teamSize} team members · {publicAudit.primaryUseCase}{" "}
+              · {publicAudit.companyStage}
             </p>
           </div>
           <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+            <a
+              href={`/api/audit/${publicAudit.auditId}/reaudit`}
+              className="text-xs font-bold text-white bg-emerald-600 border border-emerald-600 px-4 py-2 rounded-full hover:bg-emerald-700 transition-all"
+            >
+              Re-Audit Now →
+            </a>
             <DownloadPDFButton reportId={resolvedParams.reportId} />
             <Link
               href="/"
@@ -81,156 +92,191 @@ export default async function ReportPage({
           </div>
         </div>
 
-        
-
         {/* Formal Report — Client Info + AI Analysis */}
-<div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
-  {/* Report Header */}
-  <div className="bg-gray-900 text-white px-8 py-6">
-    <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1">
-      Credex · AI Spend Audit Report
-    </p>
-    <h2 className="text-xl font-bold">Confidential Audit Report</h2>
-    <p className="text-gray-400 text-xs mt-1">
-      Generated {new Date(publicAudit.createdAt).toLocaleDateString("en-US", {
-        year: "numeric", month: "long", day: "numeric"
-      })} · Report ID: {resolvedParams.reportId}
-    </p>
-  </div>
-
-  {/* Client Profile Table */}
-  <div className="px-8 py-6 border-b border-gray-100">
-    <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
-      Client Profile
-    </p>
-    <div className="grid grid-cols-2 gap-3 text-sm">
-      {[
-        ["Company Stage", publicAudit.companyStage || "—"],
-        ["Team Size", `${publicAudit.teamSize} people`],
-        ["Tech Team Size", `${publicAudit.techTeamSize} people`],
-        ["Primary Use Case", publicAudit.primaryUseCase],
-        ["Direct API Usage", publicAudit.hasApiUsage ? "Yes" : "No"],
-        ["Tools Audited", `${(publicAudit.tools ?? []).length} tools`],
-      ].map(([label, value]) => (
-        <div key={label} className="flex flex-col gap-0.5">
-          <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">{label}</span>
-          <span className="font-semibold text-gray-900">{value}</span>
-        </div>
-      ))}
-    </div>
-  </div>
-
-  {/* Tools Used Table */}
-  <div className="px-8 py-6 border-b border-gray-100">
-    <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
-      Tools & Plans
-    </p>
-    <table className="w-full text-sm">
-      <thead>
-        <tr className="border-b border-gray-100">
-          <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">Tool</th>
-          <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">Plan</th>
-          <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">Seats</th>
-          <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">Active</th>
-          <th className="text-right pb-2 text-xs text-gray-400 font-bold uppercase">Monthly</th>
-        </tr>
-      </thead>
-      <tbody className="divide-y divide-gray-50">
-        {(publicAudit.tools ?? []).map((tool: any, i: number) => (
-          <tr key={i}>
-            <td className="py-2.5 font-semibold text-gray-900">{tool.name}</td>
-            <td className="py-2.5 text-gray-500">{tool.plan}</td>
-            <td className="py-2.5 text-gray-500">{tool.seats}</td>
-            <td className="py-2.5 text-gray-500">{tool.activeUsers}</td>
-            <td className="py-2.5 text-right font-semibold">${tool.monthlySpend}</td>
-          </tr>
-        ))}
-        <tr className="border-t-2 border-gray-200">
-          <td colSpan={4} className="py-2.5 font-bold text-gray-900">Total</td>
-          <td className="py-2.5 text-right font-bold text-gray-900">${publicAudit.totalMonthlySpend}/mo</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  {/* AI-generated formal report body */}
-  {publicAudit.aiSummary && (
-    <div className="px-8 py-6 border-b border-gray-100">
-      <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
-        Analyst Report
-      </p>
-      <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed space-y-4">
-        {publicAudit.aiSummary.split("\n\n").filter(Boolean).map((para: string, i: number) => (
-          <p key={i}>{para}</p>
-        ))}
-      </div>
-    </div>
-  )}
-
-  {/* Findings Summary inside report */}
-  <div className="px-8 py-6">
-    <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
-      Detailed Findings
-    </p>
-    <div className="space-y-4">
-      {(publicAudit.findings ?? []).map((finding: any, i: number) => (
-        <div key={i} className="border border-gray-100 rounded-xl p-4">
-          <div className="flex justify-between items-start mb-2">
-            <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full flex-shrink-0 ${severityDot[finding.severity] || "bg-gray-400"}`} />
-              <span className="font-bold text-gray-900 text-sm">{finding.toolName}</span>
-              <span className="text-gray-400 text-xs">· {finding.plan}</span>
-            </div>
-            {finding.estimatedMonthlySaving > 0 && (
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
-                Save ${finding.estimatedMonthlySaving}/mo
-              </span>
-            )}
+        <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
+          {/* Report Header */}
+          <div className="bg-gray-900 text-white px-8 py-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1">
+              Credex · AI Spend Audit Report
+            </p>
+            <h2 className="text-xl font-bold">Confidential Audit Report</h2>
+            <p className="text-gray-400 text-xs mt-1">
+              Generated{" "}
+              {new Date(publicAudit.createdAt).toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}{" "}
+              · Report ID: {resolvedParams.reportId}
+            </p>
           </div>
-          <p className="text-sm font-semibold text-gray-800">{finding.recommendedAction}</p>
-          <p className="text-xs text-gray-500 mt-1">{finding.reason}</p>
-        </div>
-      ))}
-    </div>
-  </div>
-</div>
 
-{/* Credex Ad — always shown */}
-<div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-3xl p-8">
-  <div className="flex items-start gap-4">
-    <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
-      C
-    </div>
-    <div className="flex-1">
-      <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1">
-        Credex · credex.rocks
-      </p>
-      <h3 className="text-lg font-bold mb-2">
-        Buy discounted AI credits — same tools, lower price
-      </h3>
-      <p className="text-gray-300 text-sm leading-relaxed mb-4">
-        Credex sources surplus AI infrastructure credits from companies that overforecast — 
-        Cursor, Claude, ChatGPT Enterprise, Gemini, GitHub Copilot and more. 
-        The discount is real and substantial. Your team pays retail. You do not have to.
-      </p>
-      {publicAudit.isHighSavings && (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 mb-4">
-          <p className="text-emerald-300 text-sm font-semibold">
-            💡 Your audit shows ${publicAudit.totalMonthlySavings}/mo in savings potential — 
-            a Credex consultation is free and could capture this immediately.
-          </p>
+          {/* Client Profile Table */}
+          <div className="px-8 py-6 border-b border-gray-100">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
+              Client Profile
+            </p>
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              {[
+                ["Company Stage", publicAudit.companyStage || "—"],
+                ["Team Size", `${publicAudit.teamSize} people`],
+                ["Tech Team Size", `${publicAudit.techTeamSize} people`],
+                ["Primary Use Case", publicAudit.primaryUseCase],
+                ["Direct API Usage", publicAudit.hasApiUsage ? "Yes" : "No"],
+                ["Tools Audited", `${(publicAudit.tools ?? []).length} tools`],
+              ].map(([label, value]) => (
+                <div key={label} className="flex flex-col gap-0.5">
+                  <span className="text-xs text-gray-400 font-semibold uppercase tracking-wide">
+                    {label}
+                  </span>
+                  <span className="font-semibold text-gray-900">{value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Tools Used Table */}
+          <div className="px-8 py-6 border-b border-gray-100">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
+              Tools & Plans
+            </p>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">
+                    Tool
+                  </th>
+                  <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">
+                    Plan
+                  </th>
+                  <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">
+                    Seats
+                  </th>
+                  <th className="text-left pb-2 text-xs text-gray-400 font-bold uppercase">
+                    Active
+                  </th>
+                  <th className="text-right pb-2 text-xs text-gray-400 font-bold uppercase">
+                    Monthly
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {(publicAudit.tools ?? []).map((tool: any, i: number) => (
+                  <tr key={i}>
+                    <td className="py-2.5 font-semibold text-gray-900">
+                      {tool.name}
+                    </td>
+                    <td className="py-2.5 text-gray-500">{tool.plan}</td>
+                    <td className="py-2.5 text-gray-500">{tool.seats}</td>
+                    <td className="py-2.5 text-gray-500">{tool.activeUsers}</td>
+                    <td className="py-2.5 text-right font-semibold">
+                      ${tool.monthlySpend}
+                    </td>
+                  </tr>
+                ))}
+                <tr className="border-t-2 border-gray-200">
+                  <td colSpan={4} className="py-2.5 font-bold text-gray-900">
+                    Total
+                  </td>
+                  <td className="py-2.5 text-right font-bold text-gray-900">
+                    ${publicAudit.totalMonthlySpend}/mo
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* AI-generated formal report body */}
+          {publicAudit.aiSummary && (
+            <div className="px-8 py-6 border-b border-gray-100">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
+                Analyst Report
+              </p>
+              <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed space-y-4">
+                {publicAudit.aiSummary
+                  .split("\n\n")
+                  .filter(Boolean)
+                  .map((para: string, i: number) => (
+                    <p key={i}>{para}</p>
+                  ))}
+              </div>
+            </div>
+          )}
+
+          {/* Findings Summary inside report */}
+          <div className="px-8 py-6">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
+              Detailed Findings
+            </p>
+            <div className="space-y-4">
+              {(publicAudit.findings ?? []).map((finding: any, i: number) => (
+                <div key={i} className="border border-gray-100 rounded-xl p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`w-2 h-2 rounded-full flex-shrink-0 ${severityDot[finding.severity] || "bg-gray-400"}`}
+                      />
+                      <span className="font-bold text-gray-900 text-sm">
+                        {finding.toolName}
+                      </span>
+                      <span className="text-gray-400 text-xs">
+                        · {finding.plan}
+                      </span>
+                    </div>
+                    {finding.estimatedMonthlySaving > 0 && (
+                      <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-full">
+                        Save ${finding.estimatedMonthlySaving}/mo
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm font-semibold text-gray-800">
+                    {finding.recommendedAction}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">{finding.reason}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-      )}
-      <Link
-        href="https://credex.rocks"
-        target="_blank"
-        className="inline-block bg-emerald-500 text-white text-sm font-bold px-6 py-3 rounded-full hover:bg-emerald-400 transition-all"
-      >
-        Get Discounted AI Credits →
-      </Link>
-    </div>
-  </div>
-</div>
+
+        {/* Credex Ad — always shown */}
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-3xl p-8">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+              C
+            </div>
+            <div className="flex-1">
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-1">
+                Credex · credex.rocks
+              </p>
+              <h3 className="text-lg font-bold mb-2">
+                Buy discounted AI credits — same tools, lower price
+              </h3>
+              <p className="text-gray-300 text-sm leading-relaxed mb-4">
+                Credex sources surplus AI infrastructure credits from companies
+                that overforecast — Cursor, Claude, ChatGPT Enterprise, Gemini,
+                GitHub Copilot and more. The discount is real and substantial.
+                Your team pays retail. You do not have to.
+              </p>
+              {publicAudit.isHighSavings && (
+                <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 mb-4">
+                  <p className="text-emerald-300 text-sm font-semibold">
+                    💡 Your audit shows ${publicAudit.totalMonthlySavings}/mo in
+                    savings potential — a Credex consultation is free and could
+                    capture this immediately.
+                  </p>
+                </div>
+              )}
+              <Link
+                href="https://credex.rocks"
+                target="_blank"
+                className="inline-block bg-emerald-500 text-white text-sm font-bold px-6 py-3 rounded-full hover:bg-emerald-400 transition-all"
+              >
+                Get Discounted AI Credits →
+              </Link>
+            </div>
+          </div>
+        </div>
 
         {/* Spend vs Savings overview */}
         <div className="grid grid-cols-2 gap-4">
@@ -245,7 +291,9 @@ export default async function ReportPage({
               ${publicAudit.totalMonthlySpend * 12}/yr
             </p>
           </div>
-          <div className={`border rounded-3xl p-6 shadow-sm ${publicAudit.totalMonthlySavings > 0 ? "bg-emerald-50 border-emerald-200" : "bg-gray-50 border-gray-200"}`}>
+          <div
+            className={`border rounded-3xl p-6 shadow-sm ${publicAudit.totalMonthlySavings > 0 ? "bg-emerald-50 border-emerald-200" : "bg-gray-50 border-gray-200"}`}
+          >
             <p className="text-xs font-bold uppercase tracking-widest text-emerald-600">
               Potential Savings
             </p>
@@ -258,11 +306,179 @@ export default async function ReportPage({
           </div>
         </div>
 
-       
+        {/* Re-Audit History */}
+        {publicAudit.reAuditHistory &&
+          publicAudit.reAuditHistory.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">
+                Re-Audit History
+              </p>
+              <div className="space-y-6">
+                {[...publicAudit.reAuditHistory]
+                  .reverse()
+                  .map((entry: any, idx: number) => {
+                    const savingsDiff =
+                      entry.newTotalMonthlySavings -
+                      entry.oldTotalMonthlySavings;
+                    const oldStatus = entry.oldFindings?.some(
+                      (f: any) => f.severity === "high",
+                    )
+                      ? "overspending"
+                      : entry.oldFindings?.every(
+                            (f: any) => f.severity === "optimal",
+                          )
+                        ? "optimized"
+                        : "mixed";
+                    const newStatus = entry.newFindings?.some(
+                      (f: any) => f.severity === "high",
+                    )
+                      ? "overspending"
+                      : entry.newFindings?.every(
+                            (f: any) => f.severity === "optimal",
+                          )
+                        ? "optimized"
+                        : "mixed";
+                    const statusColor: Record<string, string> = {
+                      overspending: "text-red-600 bg-red-50 border-red-200",
+                      optimized:
+                        "text-emerald-600 bg-emerald-50 border-emerald-200",
+                      mixed: "text-amber-600 bg-amber-50 border-amber-200",
+                    };
+                    return (
+                      <div
+                        key={idx}
+                        className="border border-gray-100 rounded-2xl overflow-hidden"
+                      >
+                        {/* Header */}
+                        <div className="bg-gray-50 px-5 py-3 flex items-center justify-between border-b border-gray-100">
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900">
+                              {new Date(entry.triggeredAt).toLocaleDateString(
+                                "en-US",
+                                {
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                },
+                              )}{" "}
+                              <span className="text-gray-400 font-normal">
+                                {new Date(entry.triggeredAt).toLocaleTimeString(
+                                  "en-US",
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  },
+                                )}
+                              </span>
+                            </p>
+                            <p className="text-xs text-gray-500 mt-0.5">
+                              Triggered by pricing change:{" "}
+                              <span className="font-semibold text-gray-700">
+                                {entry.changedTools.join(", ")}
+                              </span>
+                            </p>
+                          </div>
+                          {savingsDiff !== 0 && (
+                            <span
+                              className={`text-xs font-bold px-3 py-1 rounded-full border ${
+                                savingsDiff > 0
+                                  ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                                  : "text-red-700 bg-red-50 border-red-200"
+                              }`}
+                            >
+                              {savingsDiff > 0 ? "+" : ""}${savingsDiff}/mo
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Before / After grid */}
+                        <div className="grid grid-cols-2 divide-x divide-gray-100">
+                          {/* Before */}
+                          <div className="p-5">
+                            <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-3">
+                              Before
+                            </p>
+                            <div className="space-y-2">
+                              <div>
+                                <p className="text-xs text-gray-400">Status</p>
+                                <span
+                                  className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border mt-0.5 ${statusColor[oldStatus]}`}
+                                >
+                                  {oldStatus}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400">
+                                  Monthly savings
+                                </p>
+                                <p className="text-xl font-bold text-gray-900">
+                                  ${entry.oldTotalMonthlySavings}
+                                  <span className="text-xs font-normal text-gray-400">
+                                    /mo
+                                  </span>
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400">
+                                  Annual savings
+                                </p>
+                                <p className="text-sm font-semibold text-gray-600">
+                                  ${entry.oldTotalMonthlySavings * 12}/yr
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* After */}
+                          <div className="p-5 bg-emerald-50/30">
+                            <p className="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-3">
+                              After
+                            </p>
+                            <div className="space-y-2">
+                              <div>
+                                <p className="text-xs text-gray-400">Status</p>
+                                <span
+                                  className={`inline-block text-xs font-semibold px-2 py-0.5 rounded-full border mt-0.5 ${statusColor[newStatus]}`}
+                                >
+                                  {newStatus}
+                                </span>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400">
+                                  Monthly savings
+                                </p>
+                                <p
+                                  className={`text-xl font-bold ${savingsDiff > 0 ? "text-emerald-700" : savingsDiff < 0 ? "text-red-600" : "text-gray-900"}`}
+                                >
+                                  ${entry.newTotalMonthlySavings}
+                                  <span className="text-xs font-normal text-gray-400">
+                                    /mo
+                                  </span>
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-400">
+                                  Annual savings
+                                </p>
+                                <p className="text-sm font-semibold text-gray-600">
+                                  ${entry.newTotalMonthlySavings * 12}/yr
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+              </div>
+            </div>
+          )}
 
         {/* Shareable link */}
         <div className="bg-white border border-gray-200 rounded-3xl p-6 shadow-sm text-center space-y-2">
-          <p className="text-sm font-semibold text-gray-700">🔗 Share this report</p>
+          <p className="text-sm font-semibold text-gray-700">
+            🔗 Share this report
+          </p>
           <p className="text-xs text-gray-400 break-all">
             {`${process.env.NEXT_PUBLIC_BASE_URL}/report/${resolvedParams.reportId}`}
           </p>
@@ -279,7 +495,6 @@ export default async function ReportPage({
             Audit a new stack
           </Link>
         </div>
-
       </div>
     </div>
   );
