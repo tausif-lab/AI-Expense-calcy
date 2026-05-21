@@ -2,7 +2,7 @@
   "crons": [
     {
       "path": "/api/detect-changes",
-      "schedule": "* * * * *"
+      "schedule": "*/30 * * * *"
     }
   ]
 }
